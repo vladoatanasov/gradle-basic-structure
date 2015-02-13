@@ -14,6 +14,7 @@ android {
 
     signingConfigs {
         releaseConsolePrompt {
+            //these values are going to be populated by our console prompt
             storeFile file("keystore.jks")
             storePassword ''
             keyAlias ''
