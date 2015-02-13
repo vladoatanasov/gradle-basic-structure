@@ -11,14 +11,14 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     signingConfigs {
-//        releasePrompt {
-//            // gradle will ask us for credentials
-//            storeFile file("keystore.jks")
-//            storePassword System.console().readPassword("\n\$ Enter keystore password: ")
-//            keyAlias System.console().readLine("\n\$ Enter key alias: ")
-//            keyPassword System.console().readPassword("\n\$ Enter key password: ")
-//        }
+        releaseConsolePrompt {
+            storeFile file("keystore.jks")
+            storePassword ''
+            keyAlias ''
+            keyPassword ''
+        }
         releaseStoredCredentials {
             // store the credentials directly in build.gradle
             // probably not a very good idea
@@ -39,6 +39,37 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             // specify the keystore configuration
             signingConfig signingConfigs.releaseStoredCredentials
+        }
+        releaseConsolePrompt {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // specify the keystore configuration
+            signingConfig signingConfigs.releaseConsolePrompt
+        }
+    }
+
+    gradle.taskGraph.whenReady { taskGraph ->
+        // Only execute when we are trying to assemble a release build
+        if(taskGraph.hasTask(':app:assembleReleaseConsolePrompt')) {
+            def password = ''
+            def alias = ''
+            def aliasPassword = ''
+
+            // gradle will ask us for credentials
+            // System.console() will return null if this is run from AndroidStudio
+            def console = System.console()
+            if(console != null) {
+                // readPassword returns a char[] so we need to wrap it into a string, because that's
+                // most likely what you need
+                password = new String(console.readPassword("\n\$ Enter keystore password: "))
+                alias = new String(console.readLine("\n\$ Enter key alias: "))
+                aliasPassword = new String(console.readPassword("\n\$ Enter key password: "))
+            }
+
+            // set the captured credentials to the signingConfig
+            signingConfigs.releaseConsolePrompt.storePassword = password
+            signingConfigs.releaseConsolePrompt.keyAlias = alias
+            signingConfigs.releaseConsolePrompt.keyPassword = aliasPassword
         }
     }
 }
