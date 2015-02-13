@@ -57,7 +57,7 @@ android {
             def aliasPassword = ''
 
             // gradle will ask us for credentials
-            // System.console() will return null if this is run from AndroidStudio
+            // System.console() can be null
             def console = System.console()
             if(console != null) {
                 // readPassword returns a char[] so we need to wrap it into a string, because that's
