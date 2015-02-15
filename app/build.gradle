@@ -28,6 +28,12 @@ android {
             keyAlias 'demo'
             keyPassword 'demo1234'
         }
+        releaseExternalCredentialsFile {
+            storeFile null
+            storePassword ''
+            keyAlias ''
+            keyPassword ''
+        }
     }
     buildTypes {
         release {
@@ -47,11 +53,17 @@ android {
             // specify the keystore configuration
             signingConfig signingConfigs.releaseConsolePrompt
         }
+        releaseExternalCredentials {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // specify the keystore configuration
+            signingConfig signingConfigs.releaseExternalCredentialsFile
+        }
     }
 
     gradle.taskGraph.whenReady { taskGraph ->
-        // Only execute when we are trying to assemble a release build
-        if(taskGraph.hasTask(':app:assembleReleaseConsolePrompt')) {
+        // Only execute when we are trying to assemble a release build with command prompt
+        if (taskGraph.hasTask(':app:assembleReleaseConsolePrompt')) {
             def password = ''
             def alias = ''
             def aliasPassword = ''
@@ -59,7 +71,7 @@ android {
             // gradle will ask us for credentials
             // System.console() can be null
             def console = System.console()
-            if(console != null) {
+            if (console != null) {
                 // readPassword returns a char[] so we need to wrap it into a string, because that's
                 // most likely what you need
                 password = new String(console.readPassword("\n\$ Enter keystore password: "))
@@ -71,6 +83,28 @@ android {
             signingConfigs.releaseConsolePrompt.storePassword = password
             signingConfigs.releaseConsolePrompt.keyAlias = alias
             signingConfigs.releaseConsolePrompt.keyPassword = aliasPassword
+        }
+
+        // Only execute when we are trying to assemble a release build with external credentials file
+        if (taskGraph.hasTask(':app:releaseExternalCredentials')) {
+            // extract credentials from a file outside the project
+            // file structure:
+            //    keystore=/path/to/keystore
+            //    keystore.password=demo1234
+            //    keystore.alias=demo
+            //    keystore.aliasPassword=demo1234
+            if (project.hasProperty("GradleDemo.properties")
+                    && new File(project.property("GradleDemo.properties")).exists()) {
+
+                Properties props = new Properties()
+                props.load(new FileInputStream(file(project.property("GradleDemo.properties"))))
+
+                signingConfigs.releaseExternalCredentialsFile.storeFile = file(props['keystore'])
+                signingConfigs.releaseExternalCredentialsFile.storePassword = props['password']
+                signingConfigs.releaseExternalCredentialsFile.keyAlias = file(props['alias'])
+                signingConfigs.releaseExternalCredentialsFile.keyPassword = file(props['aliasPassword'])
+
+            }
         }
     }
 }
