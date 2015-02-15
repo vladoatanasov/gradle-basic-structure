@@ -1,9 +1,12 @@
 package atanasov.me.gradledemo;
 
-import android.support.v7.app.ActionBarActivity;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -12,6 +15,9 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        TextView tv = (TextView) findViewById(R.id.hello);
+        tv.setText(getAppId());
     }
 
 
@@ -35,5 +41,15 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private String getAppId() {
+        PackageInfo pi;
+        try {
+            pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+            return pi.packageName;
+        } catch (final PackageManager.NameNotFoundException e) {
+            return "na";
+        }
     }
 }

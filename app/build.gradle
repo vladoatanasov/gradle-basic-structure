@@ -59,6 +59,12 @@ android {
             // specify the keystore configuration
             signingConfig signingConfigs.releaseExternalCredentialsFile
         }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // add a debug suffix to applicationId
+            applicationIdSuffix '.debug'
+        }
     }
 
     gradle.taskGraph.whenReady { taskGraph ->
